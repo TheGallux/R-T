@@ -35,6 +35,10 @@ async def load_extensions():
     """
 
     for root, _, files in os.walk("./modules"):
+
+        if "utils" in root:
+            continue
+
         for file in files:
             if file.endswith(".py") and not file.startswith("__"):
 
@@ -55,7 +59,7 @@ async def load_extensions():
 @bot.event
 async def on_ready():
     """
-    Launches commands once the bot is uable on Discord
+    Launches commands once the bot is uable on Discord.
     """
 
     print(f"Logged in as {bot.user}")
@@ -63,10 +67,11 @@ async def on_ready():
 
 async def main():
     """
-    Launches the bot
+    Launches the bot, and inits its memory.
     """
 
     async with bot:
+        bot.state = {}
         await load_extensions()
         await bot.start(TOKEN)
 
