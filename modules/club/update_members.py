@@ -141,21 +141,6 @@ class UpdateMembersLoop(commands.Cog):
 
         self.bot.state["members"] = updated_members
 
-    # ---
-
-    @commands.command()
-    async def display_members(self, ctx):
-        """
-        FIXME: To remove. Temporary to test the passive members fetching.
-        """
-        members_list = self.bot.state["members"]
-        chunk_size = 10
-
-        for i in range(0, len(members_list), chunk_size):
-            text = "\n".join([str(v) for v in members_list[i: i + chunk_size]])
-            await ctx.send(text)
-
-
 async def setup(bot):
     """
     The function used to load the `update_members` loop.
