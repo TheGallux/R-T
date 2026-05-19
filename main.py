@@ -65,6 +65,16 @@ async def on_ready():
     print(f"Logged in as {bot.user}")
 
 
+@bot.command()
+async def reload(ctx, extension):
+    """
+    Allows reloading modules when running using `!reload <module>`
+    """
+
+    await bot.reload_extension(f"modules.{extension}")
+    await ctx.send(f"Reloaded {extension}")
+
+
 async def main():
     """
     Launches the bot, and inits its memory.
