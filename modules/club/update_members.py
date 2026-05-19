@@ -10,6 +10,7 @@ from discord.ext import commands, tasks
 
 import aiohttp
 
+
 async def fetch_members():
     """
     A function to fetch the members of the club, done async.
