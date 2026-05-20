@@ -141,6 +141,7 @@ class UpdateMembersLoop(commands.Cog):
 
         self.bot.state["members"] = updated_members
 
+
 async def setup(bot):
     """
     The function used to load the `update_members` loop.

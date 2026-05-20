@@ -5,6 +5,8 @@ Lists all memebrs in the club.
 
 from discord.ext import commands
 
+from modules.utils.pretty_print import pretty_print
+
 
 class Members(commands.Cog):
     """
@@ -20,11 +22,11 @@ class Members(commands.Cog):
         The `members` command.
         """
         members_list = self.bot.state["members"]
-        chunk_size = 10
+        chunk_size = 6
 
         for i in range(0, len(members_list), chunk_size):
-            text = "\n".join([str(v) for v in members_list[i: i + chunk_size]])
-            await ctx.send(text)
+            text = pretty_print(members_list[i: i + chunk_size])
+            await ctx.send(f"```yaml\n{text}```")
 
 
 async def setup(bot):

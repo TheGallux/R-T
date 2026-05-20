@@ -5,6 +5,8 @@ Retrieve a membar based on its name.
 
 from discord.ext import commands
 
+from modules.utils.pretty_print import pretty_print
+
 
 class Member(commands.Cog):
     """
@@ -22,7 +24,7 @@ class Member(commands.Cog):
 
         for member in self.bot.state.get("members", []):
             if member["name"] == member_name:
-                await ctx.send(member)
+                await ctx.send(f"```yaml\n{pretty_print(member)}```")
                 return
 
         await ctx.send(f"{member_name} not found!")
