@@ -2,8 +2,9 @@
 Entry point for R-T.
 """
 
-import os
 import asyncio
+import json
+import os
 from dotenv import load_dotenv
 
 import discord
@@ -82,6 +83,8 @@ async def main():
 
     async with bot:
         bot.state = {}
+        with open("link.json", 'r', encoding="utf-8") as f:
+            bot.state["linker"] = json.loads(''.join(f.readlines()))
         await load_extensions()
         await bot.start(TOKEN)
 

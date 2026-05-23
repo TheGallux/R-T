@@ -1,6 +1,6 @@
 """
 The `member` command.
-Retrieve a membar based on its name.
+Retrieve a member based on its name.
 """
 
 from discord.ext import commands
