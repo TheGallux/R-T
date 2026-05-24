@@ -5,6 +5,7 @@ Retrieve a member based on its name.
 
 from discord.ext import commands
 
+from modules.utils.is_admin import discord_user_is_admin
 from modules.utils.pretty_print import pretty_print
 
 
@@ -21,6 +22,10 @@ class Member(commands.Cog):
         """
         The `member` command.
         """
+
+        if not discord_user_is_admin(self.bot, ctx.message.author.id):
+            await ctx.send("Command user is not an administrator !")
+            return
 
         for member in self.bot.state.get("members", []):
             if member["name"] == member_name:

@@ -118,6 +118,7 @@ class UpdateMembersLoop(commands.Cog):
         club_map = {m["tag"]: m for m in data}
         player_map = {m["tag"]: m for m in data2}
         updated_members = []
+        admins = []
 
         for tag, club_member in club_map.items():
             player_data = player_map.get(tag, {})
@@ -137,9 +138,13 @@ class UpdateMembersLoop(commands.Cog):
                     player_data.get("highestAllTimeRankedElo"),
             }
 
+            if parsed_member["role"] in ("president", "vicePresident"):
+                admins.append(parsed_member["tag"])
+
             updated_members.append(parsed_member)
 
         self.bot.state["members"] = updated_members
+        self.bot.state["admins"] = admins
 
 
 async def setup(bot):

@@ -5,6 +5,7 @@ Lists all memebrs in the club.
 
 from discord.ext import commands
 
+from modules.utils.is_admin import discord_user_is_admin
 from modules.utils.pretty_print import pretty_print
 
 
@@ -21,6 +22,11 @@ class Members(commands.Cog):
         """
         The `members` command.
         """
+
+        if not discord_user_is_admin(self.bot, ctx.message.author.id):
+            await ctx.send("Command user is not an administrator !")
+            return
+
         members_list = self.bot.state["members"]
         chunk_size = 6
 
