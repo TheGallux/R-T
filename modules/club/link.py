@@ -8,6 +8,8 @@ import discord
 
 from discord.ext import commands
 
+from modules.utils.debug_messages import print_load_message
+
 
 class Link(commands.Cog):
     """
@@ -71,5 +73,5 @@ async def setup(bot):
     The function used to load the `member` command.
     """
 
-    print("Loading `link` command from `club` module.")
+    print_load_message(__file__, "commands")
     await bot.add_cog(Link(bot))

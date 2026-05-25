@@ -5,6 +5,8 @@ On it, the bot display back "Pong!".
 
 from discord.ext import commands
 
+from modules.utils.debug_messages import print_load_message
+
 
 class Ping(commands.Cog):
     """
@@ -28,5 +30,5 @@ async def setup(bot):
     The function used to load the `ping` command.
     """
 
-    print("Loading `ping` command from `debug` module.")
+    print_load_message(__file__, "command")
     await bot.add_cog(Ping(bot))

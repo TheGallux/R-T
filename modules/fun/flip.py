@@ -8,6 +8,8 @@ from random import choice, randint
 import asyncio
 from discord.ext import commands
 
+from modules.utils.debug_messages import print_load_message
+
 
 class Flip(commands.Cog):
     """
@@ -38,5 +40,5 @@ async def setup(bot):
     The function used to load the `flip` command.
     """
 
-    print("Loading `flip` command from `fun` module.")
+    print_load_message(__file__, "command")
     await bot.add_cog(Flip(bot))

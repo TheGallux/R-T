@@ -10,6 +10,8 @@ from discord.ext import commands, tasks
 
 import aiohttp
 
+from modules.utils.debug_messages import print_load_message
+
 
 async def fetch_members():
     """
@@ -152,5 +154,5 @@ async def setup(bot):
     The function used to load the `update_members` loop.
     """
 
-    print("Loading `update_members` loop from `club` module.")
+    print_load_message(__file__, "loop")
     await bot.add_cog(UpdateMembersLoop(bot))

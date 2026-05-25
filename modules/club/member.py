@@ -5,6 +5,7 @@ Retrieve a member based on its name.
 
 from discord.ext import commands
 
+from modules.utils.debug_messages import print_load_message
 from modules.utils.is_admin import discord_user_is_admin
 from modules.utils.pretty_print import pretty_print
 
@@ -40,5 +41,5 @@ async def setup(bot):
     The function used to load the `member` command.
     """
 
-    print("Loading `member` command from `code` module.")
+    print_load_message(__file__, "command")
     await bot.add_cog(Member(bot))
