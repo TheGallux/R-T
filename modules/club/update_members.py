@@ -147,6 +147,7 @@ class UpdateMembersLoop(commands.Cog):
 
         self.bot.state["members"] = updated_members
         self.bot.state["admins"] = admins
+        self.bot.state["retrieved_members"] = True
 
 
 async def setup(bot):
