@@ -63,6 +63,7 @@ async def on_ready():
     Launches commands once the bot is uable on Discord.
     """
 
+    bot.state["guild"] = bot.get_guild(int(os.getenv("GUILD_ID")))
     print(f"Logged in as {bot.user}")
 
 
@@ -84,9 +85,20 @@ async def main():
     async with bot:
         bot.state = {}
         bot.state["retrieved_members"] = False
+
+        bot.state["trophies_roles_id"] = \
+            [int(role) for role in os.getenv("TROPHIES_ROLES_ID").split(',')]
+        bot.state["trophies_threshold"] = \
+            [int(n) for n in os.getenv("TROPHIES_THRESHOLDS").split(',')]
+
+        bot.state["ranked_roles_id"] = \
+            [int(role) for role in os.getenv("RANKED_ROLES_ID").split(',')]
+        bot.state["ranked_threshold"] = \
+            [int(n) for n in os.getenv("RANKED_THRESHOLDS").split(',')]
+
         with open("link.json", 'r', encoding="utf-8") as f:
             bot.state["linker"] = json.loads(''.join(f.readlines()))
-        bot.state["club_id"] = int(os.getenv("CLUB_ID"))
+
         await load_extensions()
         await bot.start(TOKEN)
 

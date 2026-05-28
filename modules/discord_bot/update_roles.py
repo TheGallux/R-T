@@ -8,7 +8,6 @@ Every hour for every member linked in the Discord, it will :
 
 import asyncio
 
-from os import environ
 import discord
 from discord.ext import commands, tasks
 
@@ -16,18 +15,17 @@ from modules.utils.debug_messages import print_load_message
 from modules.utils.get_fetched_member import get_fetched_member
 
 
-def get_trophies_role(tr: int, roles: list[int], tr_threshold: int) -> int:
+def get_role(n: int, roles: list[int], thresholds: list[int]) -> int:
     """
-    Returns the correct role based on trophies.
+    Returns the correct role based on a list of thresholds (sorted).
     The last role is a lower bound.
     """
 
-    index = tr // tr_threshold
+    for i, threshold in enumerate(thresholds):
+        if n < threshold:
+            return roles[i]
 
-    if index >= len(roles):
-        index = len(roles) - 1
-
-    return roles[index]
+    return roles[-1]
 
 
 async def sync_role_category(member, category_roles, target_role):
@@ -41,8 +39,7 @@ async def sync_role_category(member, category_roles, target_role):
 
     to_remove = [role for role in category_roles if role in member.roles]
 
-    for role in to_remove:
-        await member.remove_roles(role)
+    await member.remove_roles(*to_remove)
 
     await member.add_roles(target_role)
 
@@ -54,12 +51,6 @@ class UpdateRolesLoop(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-
-        trophies_roles_id = environ["TROPHIES_ROLES_ID"]
-        self.bot.state["trophies_roles_id"] = \
-            [int(role) for role in trophies_roles_id.split(',')]
-        self.bot.state["tr_threshold"] = int(environ["TROPHIES_THRESHOLD"])
-
         self.update_roles.start()
 
     @tasks.loop(hours=1)
@@ -68,36 +59,44 @@ class UpdateRolesLoop(commands.Cog):
         The `update_roles` loop.
         """
 
+        state = self.bot.state
         await asyncio.gather(
-            self.update_trophies(),
-            self.update_club_roles(),
+            self.update_roles_with_thresholds("trophies",
+                                              state["trophies_roles_id"],
+                                              state["trophies_threshold"]),
+            self.update_roles_with_thresholds("ranked_elo",
+                                              state["ranked_roles_id"],
+                                              state["ranked_threshold"]),
             self.update_ranked_roles(),
         )
 
-    async def update_trophies(self):
+    async def update_roles_with_thresholds(self,
+                                           x: str,
+                                           roles_id: list[str],
+                                           thresholds: list[int]):
         """
         Synchronizes trophies roles for all linked Discord members.
         """
 
-        guild = self.bot.get_guild(self.bot.state["club_id"])
+        guild = self.bot.state["guild"]
         linker = self.bot.state["linker"]
 
-        for member_id in linker:
-            member = await guild.fetch_member(int(member_id))
+        for discord_id in linker:
+            member = await guild.fetch_member(int(discord_id))
             if member is None:
                 continue
 
-            role_id = get_trophies_role(
+            role_id = get_role(
                 get_fetched_member(self.bot,
                                    "tag",
-                                   linker[member_id])["trophies"],
-                self.bot.state["trophies_roles_id"],
-                self.bot.state["tr_threshold"])
+                                   linker[discord_id])[x],
+                roles_id,
+                thresholds)
 
             try:
                 await sync_role_category(member,
                                          [guild.get_role(role) for role in
-                                          self.bot.state["trophies_roles_id"]],
+                                          roles_id],
                                          guild.get_role(role_id))
                 print(f"Adding {guild.get_role(role_id)} to {member.name}")
 
