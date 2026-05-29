@@ -10,7 +10,10 @@ from discord.ext import commands, tasks
 
 import aiohttp
 
-from modules.utils.debug_messages import print_load_message
+from modules.utils.logger import get_logger
+
+
+logger = get_logger(__name__)
 
 
 async def fetch_members():
@@ -32,11 +35,9 @@ async def fetch_members():
         async with session.get(url, headers=headers) as response:
 
             if response.status != 200:
-                print(
-                    "[club][update_members][fetch_members] - "
-                    "Error fetching members:", response.status
-                )
+                logger.error("Error fetching members: %s", response.status)
                 return
+            logger.info("Succesfully fetched members")
 
             data = await response.json()
 
@@ -59,9 +60,9 @@ async def fetch_player(session, tag: str):
     async with session.get(url, headers=headers) as response:
 
         if response.status != 200:
-            print("[club][update_members][fetch_player]:",
-                  "Error fetching player:", tag, response.status)
+            logger.error("Error fetching player: %s", tag)
             return None
+        logger.debug("Succesfully fetched player %s", tag)
 
         return await response.json()
 
@@ -74,6 +75,7 @@ class UpdateMembersLoop(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.update_members.start()
+        logger.info("Initialized `update_members` cog")
 
     async def upgrade_fetched_members(self, tag_list: list[str]):
         """
@@ -98,23 +100,24 @@ class UpdateMembersLoop(commands.Cog):
         """
         The `update_members` loop.
         """
+        logger.info("Running `update_members` loop")
 
         # Fetching data
         try:
             data = await fetch_members()
+            logger.info("Sucessfully fetched %s club members.", len(data))
 
         except (aiohttp.ClientError, asyncio.TimeoutError) as e:
-            print("[club][fetch_members][fetch_members] - Unexpected error:",
-                  e)
+            logger.error("Unexpected error fetching members: %s", e)
 
         try:
             data2 = await self.upgrade_fetched_members(
                 [member["tag"] for member in data]
             )
+            logger.info("Sucessfully fetched %s enriched players.", len(data2))
 
         except (aiohttp.ClientError, asyncio.TimeoutError) as e:
-            print("[club][fetch_members][upgrade_fetched_members] - "
-                  "Unexpected error:", e)
+            logger.error("Unexpected error fetching enriched players: %s", e)
 
         # Using fetched data
         club_map = {m["tag"]: m for m in data}
@@ -145,6 +148,10 @@ class UpdateMembersLoop(commands.Cog):
 
             updated_members.append(parsed_member)
 
+        logger.info(
+            "update_members completed: %s members, %s admins",
+            len(updated_members), len(admins)
+        )
         self.bot.state["members"] = updated_members
         self.bot.state["admins"] = admins
         self.bot.state["retrieved_members"] = True
@@ -154,6 +161,6 @@ async def setup(bot):
     """
     The function used to load the `update_members` loop.
     """
+    logger.info("Loading `update_members` cog.")
 
-    print_load_message(__file__, "loop")
     await bot.add_cog(UpdateMembersLoop(bot))

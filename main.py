@@ -10,6 +10,11 @@ from dotenv import load_dotenv
 import discord
 from discord.ext import commands
 
+from modules.utils.logger import get_logger
+
+
+logger = get_logger(__name__)
+
 load_dotenv()
 
 TOKEN = os.getenv("RT_TOKEN")
@@ -54,7 +59,7 @@ async def load_extensions():
 
                 await bot.load_extension(module)
 
-                print(f"Loaded {module}")
+                logger.info("Finish loading `%s`", module)
 
 
 @bot.event
@@ -64,7 +69,7 @@ async def on_ready():
     """
 
     bot.state["guild"] = bot.get_guild(int(os.getenv("GUILD_ID")))
-    print(f"Logged in as {bot.user}")
+    logger.info("Logged in as `%s`", bot.user)
 
 
 @bot.command()
@@ -85,6 +90,7 @@ async def main():
     async with bot:
         bot.state = {}
         bot.state["retrieved_members"] = False
+        bot.state["screenshot_channel"] = int(os.getenv("SCREENSHOT_CHANNEL"))
 
         bot.state["trophies_roles_id"] = \
             [int(role) for role in os.getenv("TROPHIES_ROLES_ID").split(',')]

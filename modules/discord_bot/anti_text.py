@@ -5,10 +5,12 @@ does not contains a message. If it does contain a message, it create a thread
 so users can speak on it.
 """
 
-from os import environ
 from discord.ext import commands
 
-from modules.utils.debug_messages import print_load_message
+from modules.utils.logger import get_logger
+
+
+logger = get_logger(__name__)
 
 
 class AntiTextEvent(commands.Cog):
@@ -18,21 +20,27 @@ class AntiTextEvent(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.screenshot_channel_id = int(environ["SCREENSHOT_CHANNEL"])
+        logger.info("Initialized `anti-text` cog")
 
     @commands.Cog.listener()
     async def on_message(self, message):
         """
         The `anti_text` event.
         """
+        logger.info("`anti-text` event launched by %s in %d (%d)",
+                    message.author.display_name, message.channel.id,
+                    message.id)
 
         if message.author.bot:
+            logger.info("Message sent by R-T")
             return
 
-        if message.channel.id != self.screenshot_channel_id:
+        if message.channel.id != self.bot.state["screenshot_channel"]:
+            logger.info("Message not sent in a tracked channel")
             return
 
         if not message.attachments:
+            logger.info("Deleted message because not containing an image.")
             await message.delete()
             await message.channel.send(
                 f"{message.author.mention}, tu ne peux pas envoyer uniquement "
@@ -41,6 +49,8 @@ class AntiTextEvent(commands.Cog):
             )
 
         else:
+            logger.info("Message does contain an image, adding reactions "
+                        "and creating thread.")
             await message.add_reaction("<:thumbs_up:1509338751770296441>")
             await message.add_reaction("<:thumbs_down:1509338725019287703>")
 
@@ -59,6 +69,6 @@ async def setup(bot):
     """
     The function used to load the `anti_text` event.
     """
+    logger.info("Loading `anti-text` cog.")
 
-    print_load_message(__file__, "event")
     await bot.add_cog(AntiTextEvent(bot))

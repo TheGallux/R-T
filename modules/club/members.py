@@ -5,9 +5,12 @@ Lists all memebrs in the club.
 
 from discord.ext import commands
 
-from modules.utils.debug_messages import print_load_message
 from modules.utils.is_admin import discord_user_is_admin
 from modules.utils.pretty_print import pretty_print
+from modules.utils.logger import get_logger
+
+
+logger = get_logger(__name__)
 
 
 class Members(commands.Cog):
@@ -17,12 +20,15 @@ class Members(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        logger.info("Initialized `members` cog")
 
     @commands.command()
     async def members(self, ctx):
         """
         The `members` command.
         """
+        logger.info("`members` command used by `%s` (%s)", ctx.author,
+                    ctx.author.id)
 
         if not discord_user_is_admin(self.bot, ctx.message.author.id):
             await ctx.send("Command user is not an administrator !")
@@ -40,6 +46,6 @@ async def setup(bot):
     """
     The function used to load the `members` command.
     """
+    logger.info("Loading `members` cog.")
 
-    print_load_message(__file__, "command")
     await bot.add_cog(Members(bot))

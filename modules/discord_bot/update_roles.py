@@ -11,8 +11,12 @@ import asyncio
 import discord
 from discord.ext import commands, tasks
 
-from modules.utils.debug_messages import print_load_message
+from modules.utils.get_cached_member import get_cached_member
 from modules.utils.get_fetched_member import get_fetched_member
+from modules.utils.logger import get_logger
+
+
+logger = get_logger(__name__)
 
 
 def get_role(n: int, roles: list[int], thresholds: list[int]) -> int:
@@ -33,14 +37,19 @@ async def sync_role_category(member, category_roles, target_role):
     Removes all category roles from the member and adds the target role if
     necessary.
     """
+    logger.debug("Syncing `%s` from `%s`", target_role, member.display_name)
 
     if target_role in member.roles:
+        logger.debug("`%s` already have `%s`", member.display_name,
+                     target_role)
         return
 
     to_remove = [role for role in category_roles if role in member.roles]
 
+    logger.debug("Removing `%s` from `%s`", to_remove, member.display_name)
     await member.remove_roles(*to_remove)
 
+    logger.debug("Adding `%s` from `%s`", target_role, member.display_name)
     await member.add_roles(target_role)
 
 
@@ -52,12 +61,14 @@ class UpdateRolesLoop(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.update_roles.start()
+        logger.info("Initialized `update_roles` cog")
 
     @tasks.loop(hours=1)
     async def update_roles(self):
         """
         The `update_roles` loop.
         """
+        logger.info("Running `update_roles` loop")
 
         state = self.bot.state
         await asyncio.gather(
@@ -67,11 +78,14 @@ class UpdateRolesLoop(commands.Cog):
             self.update_roles_with_thresholds("ranked_elo",
                                               state["ranked_roles_id"],
                                               state["ranked_threshold"]),
-            self.update_ranked_roles(),
+            self.update_club_roles(),
         )
 
+        logger.info("`update_role` completed for %s linked members",
+                    len(self.bot.state["linker"]))
+
     async def update_roles_with_thresholds(self,
-                                           x: str,
+                                           filt: str,
                                            roles_id: list[str],
                                            thresholds: list[int]):
         """
@@ -82,14 +96,16 @@ class UpdateRolesLoop(commands.Cog):
         linker = self.bot.state["linker"]
 
         for discord_id in linker:
-            member = await guild.fetch_member(int(discord_id))
+            member = await get_cached_member(self.bot, int(discord_id))
             if member is None:
+                logger.warning("Discord member not found for discord_id=%s",
+                               discord_id)
                 continue
 
             role_id = get_role(
                 get_fetched_member(self.bot,
                                    "tag",
-                                   linker[discord_id])[x],
+                                   linker[discord_id])[filt],
                 roles_id,
                 thresholds)
 
@@ -98,19 +114,16 @@ class UpdateRolesLoop(commands.Cog):
                                          [guild.get_role(role) for role in
                                           roles_id],
                                          guild.get_role(role_id))
-                print(f"Adding {guild.get_role(role_id)} to {member.name}")
 
             except discord.Forbidden:
-                print("Missing permissions or role hierarchy issue")
+                logger.error(
+                    "Failed syncing roles for %s (%s): missing permissions ",
+                    member.display_name, member.id
+                )
 
     async def update_club_roles(self):
         """
         Synchronizes club roles for all linked Discord members.
-        """
-
-    async def update_ranked_roles(self):
-        """
-        Synchronizes ranked roles for all linked Discord members.
         """
 
     @update_roles.before_loop
@@ -122,7 +135,7 @@ class UpdateRolesLoop(commands.Cog):
         await self.bot.wait_until_ready()
 
         while not self.bot.state["retrieved_members"]:
-            print("Waiting for members to be retrieved...")
+            logger.debug("Waiting member to be fetched...")
             await asyncio.sleep(1)
 
 
@@ -130,6 +143,6 @@ async def setup(bot):
     """
     The function used to load the `update_roles` loop.
     """
+    logger.info("Loading `update_roles` cog.")
 
-    print_load_message(__file__, "loop")
     await bot.add_cog(UpdateRolesLoop(bot))

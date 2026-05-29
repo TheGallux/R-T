@@ -8,7 +8,10 @@ from random import choice, randint
 import asyncio
 from discord.ext import commands
 
-from modules.utils.debug_messages import print_load_message
+from modules.utils.logger import get_logger
+
+
+logger = get_logger(__name__)
 
 
 class Flip(commands.Cog):
@@ -18,12 +21,15 @@ class Flip(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        logger.info("Initialized `flip` cog")
 
     @commands.command()
     async def flip(self, ctx):
         """
         The `flip` command.
         """
+        logger.info("`member` command used by `%s` (%s)", ctx.author,
+                    ctx.author.id)
 
         msg = await ctx.send("Flipping the coin...")
 
@@ -39,6 +45,6 @@ async def setup(bot):
     """
     The function used to load the `flip` command.
     """
+    logger.info("Loading `flip` cog.")
 
-    print_load_message(__file__, "command")
     await bot.add_cog(Flip(bot))

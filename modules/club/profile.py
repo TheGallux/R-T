@@ -5,8 +5,13 @@ Shows a mem
 
 from discord.ext import commands
 
-from modules.utils.debug_messages import print_load_message
+
+from modules.utils.get_fetched_member import get_fetched_member
 from modules.utils.pretty_print import pretty_print
+from modules.utils.logger import get_logger
+
+
+logger = get_logger(__name__)
 
 
 class Profile(commands.Cog):
@@ -22,21 +27,25 @@ class Profile(commands.Cog):
         """
         The `profile` command.
         """
+        logger.info("`profile` command used by `%s` (%s)", ctx.author,
+                    ctx.author.id)
 
         author_tag = self.bot.state["linker"].get(str(ctx.author.id), '')
+        if author_tag == '':
+            await ctx.send("Author is not linked yet!")
+            return
 
-        for member in self.bot.state["members"]:
-            if member["tag"] == author_tag:
-                await ctx.send("```yaml\n" + pretty_print(member) + "```")
-                return
-
-        await ctx.send("Author is not in the club or not linked yet!")
+        await ctx.send("```yaml\n" +
+                       pretty_print(get_fetched_member(self.bot,
+                                                       "tag",
+                                                       author_tag))
+                       + "```")
 
 
 async def setup(bot):
     """
     The function used to load the `member` command.
     """
+    logger.info("Loading `profile` cog.")
 
-    print_load_message(__file__, "command")
     await bot.add_cog(Profile(bot))
