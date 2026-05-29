@@ -126,6 +126,41 @@ class UpdateRolesLoop(commands.Cog):
         Synchronizes club roles for all linked Discord members.
         """
 
+        guild = self.bot.state["guild"]
+        linker = self.bot.state["linker"]
+        roles_id = self.bot.state["club_roles_id"]
+
+        for discord_id in linker:
+            member = await get_cached_member(self.bot, int(discord_id))
+            if member is None:
+                logger.warning("Discord member not found for discord_id=%s",
+                               discord_id)
+                continue
+
+            role = get_fetched_member(self.bot, "tag",
+                                      linker[discord_id])["role"]
+            role_id = None
+            for i, club_role in enumerate(["member", "senior",
+                                           "vicePresident", "president"]):
+                if role == club_role:
+                    role_id = roles_id[i]
+            if role_id is None:
+                logger.error("`%s` member role not found! (`%s`)",
+                             member, role)
+                continue
+
+            try:
+                await sync_role_category(member,
+                                         [guild.get_role(role) for role in
+                                          roles_id],
+                                         guild.get_role(role_id))
+
+            except discord.Forbidden:
+                logger.error(
+                    "Failed syncing roles for %s (%s): missing permissions ",
+                    member.display_name, member.id
+                )
+
     @update_roles.before_loop
     async def before_update_roles(self):
         """

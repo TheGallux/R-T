@@ -102,6 +102,9 @@ async def main():
         bot.state["ranked_threshold"] = \
             [int(n) for n in os.getenv("RANKED_THRESHOLDS").split(',')]
 
+        bot.state["club_roles_id"] = \
+            [int(role) for role in os.getenv("CLUB_ROLES_ID").split(',')]
+
         with open("link.json", 'r', encoding="utf-8") as f:
             bot.state["linker"] = json.loads(''.join(f.readlines()))
 
