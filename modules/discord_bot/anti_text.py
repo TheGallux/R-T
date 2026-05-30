@@ -35,7 +35,7 @@ class AntiTextEvent(commands.Cog):
             logger.info("Message sent by R-T")
             return
 
-        if message.channel.id != self.bot.state["screenshot_channel"]:
+        if message.channel.id != self.bot.state.screenshot_channel:
             logger.info("Message not sent in a tracked channel")
             return
 

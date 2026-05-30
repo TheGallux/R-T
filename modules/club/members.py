@@ -34,7 +34,7 @@ class Members(commands.Cog):
             await ctx.send("Command user is not an administrator !")
             return
 
-        members_list = self.bot.state["members"]
+        members_list = self.bot.state.members
         chunk_size = 6
 
         for i in range(0, len(members_list), chunk_size):

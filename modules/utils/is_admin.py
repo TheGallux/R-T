@@ -10,4 +10,4 @@ def discord_user_is_admin(bot, author_id):
     administrator account.
     """
 
-    return bot.state["linker"].get(str(author_id), '') in bot.state["admins"]
+    return bot.state.linker.get(str(author_id), '') in bot.state.admins

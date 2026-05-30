@@ -30,7 +30,7 @@ class Profile(commands.Cog):
         logger.info("`profile` command used by `%s` (%s)", ctx.author,
                     ctx.author.id)
 
-        author_tag = self.bot.state["linker"].get(str(ctx.author.id), '')
+        author_tag = self.bot.state.linker.get(str(ctx.author.id), '')
         if author_tag == '':
             await ctx.send("Author is not linked yet!")
             return

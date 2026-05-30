@@ -12,7 +12,7 @@ async def get_cached_member(bot, discord_id: int):
     Falls back to an API fetch if necessary.
     """
 
-    guild = bot.state["guild"]
+    guild = bot.state.guild
 
     member = guild.get_member(discord_id)
 

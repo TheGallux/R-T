@@ -30,7 +30,7 @@ class Link(commands.Cog):
         """
 
         with open(path, "w", encoding="utf-8") as f:
-            json.dump(self.bot.state["linker"], f, indent=4)
+            json.dump(self.bot.state.linker, f, indent=4)
 
         logger.info("Updated linker file (%s)", path)
 
@@ -51,7 +51,7 @@ class Link(commands.Cog):
                            discord_member.display_name)
             return
 
-        self.bot.state["linker"][str(discord_member.id)] = tag
+        self.bot.state.linker[str(discord_member.id)] = tag
 
         self.update_json("link.json")
 
@@ -70,12 +70,12 @@ class Link(commands.Cog):
                     ctx.author.display_name, ctx.author.id)
         discord_id = str(discord_member.id)
 
-        if discord_id not in self.bot.state["linker"]:
+        if discord_id not in self.bot.state.linker:
             logger.warning("`%s` is not linked", discord_member.id)
             await ctx.send(f"{discord_member.name} is not linked!")
             return
 
-        del self.bot.state["linker"][discord_id]
+        del self.bot.state.linker[discord_id]
 
         self.update_json("link.json")
 

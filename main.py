@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 import discord
 from discord.ext import commands
 
+from modules.core.bot_state import BotState
 from modules.utils.logger import get_logger
 
 
@@ -42,7 +43,7 @@ async def load_extensions():
 
     for root, _, files in os.walk("./modules"):
 
-        if "utils" in root:
+        if "utils" in root or "core" in root:
             continue
 
         for file in files:
@@ -68,7 +69,7 @@ async def on_ready():
     Launches commands once the bot is uable on Discord.
     """
 
-    bot.state["guild"] = bot.get_guild(int(os.getenv("GUILD_ID")))
+    bot.state.guild = bot.get_guild(int(os.getenv("GUILD_ID")))
     logger.info("Logged in as `%s`", bot.user)
 
 
@@ -88,25 +89,25 @@ async def main():
     """
 
     async with bot:
-        bot.state = {}
-        bot.state["retrieved_members"] = False
-        bot.state["screenshot_channel"] = int(os.getenv("SCREENSHOT_CHANNEL"))
+        bot.state = BotState()
+        bot.state.retrieved_members = False
+        bot.state.screenshot_channel = int(os.getenv("SCREENSHOT_CHANNEL"))
 
-        bot.state["trophies_roles_id"] = \
+        bot.state.trophies_roles_id = \
             [int(role) for role in os.getenv("TROPHIES_ROLES_ID").split(',')]
-        bot.state["trophies_threshold"] = \
+        bot.state.trophies_threshold = \
             [int(n) for n in os.getenv("TROPHIES_THRESHOLDS").split(',')]
 
-        bot.state["ranked_roles_id"] = \
+        bot.state.ranked_roles_id = \
             [int(role) for role in os.getenv("RANKED_ROLES_ID").split(',')]
-        bot.state["ranked_threshold"] = \
+        bot.state.ranked_threshold = \
             [int(n) for n in os.getenv("RANKED_THRESHOLDS").split(',')]
 
-        bot.state["club_roles_id"] = \
+        bot.state.club_roles_id = \
             [int(role) for role in os.getenv("CLUB_ROLES_ID").split(',')]
 
         with open("link.json", 'r', encoding="utf-8") as f:
-            bot.state["linker"] = json.loads(''.join(f.readlines()))
+            bot.state.linker = json.loads(''.join(f.readlines()))
 
         await load_extensions()
         await bot.start(TOKEN)

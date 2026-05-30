@@ -73,16 +73,16 @@ class UpdateRolesLoop(commands.Cog):
         state = self.bot.state
         await asyncio.gather(
             self.update_roles_with_thresholds("trophies",
-                                              state["trophies_roles_id"],
-                                              state["trophies_threshold"]),
+                                              state.trophies_roles_id,
+                                              state.trophies_threshold),
             self.update_roles_with_thresholds("ranked_elo",
-                                              state["ranked_roles_id"],
-                                              state["ranked_threshold"]),
+                                              state.ranked_roles_id,
+                                              state.ranked_threshold),
             self.update_club_roles(),
         )
 
         logger.info("`update_role` completed for %s linked members",
-                    len(self.bot.state["linker"]))
+                    len(self.bot.state.linker))
 
     async def update_roles_with_thresholds(self,
                                            filt: str,
@@ -92,8 +92,8 @@ class UpdateRolesLoop(commands.Cog):
         Synchronizes trophies roles for all linked Discord members.
         """
 
-        guild = self.bot.state["guild"]
-        linker = self.bot.state["linker"]
+        guild = self.bot.state.guild
+        linker = self.bot.state.linker
 
         for discord_id in linker:
             member = await get_cached_member(self.bot, int(discord_id))
@@ -126,9 +126,9 @@ class UpdateRolesLoop(commands.Cog):
         Synchronizes club roles for all linked Discord members.
         """
 
-        guild = self.bot.state["guild"]
-        linker = self.bot.state["linker"]
-        roles_id = self.bot.state["club_roles_id"]
+        guild = self.bot.state.guild
+        linker = self.bot.state.linker
+        roles_id = self.bot.state.club_roles_id
 
         for discord_id in linker:
             member = await get_cached_member(self.bot, int(discord_id))
@@ -138,16 +138,17 @@ class UpdateRolesLoop(commands.Cog):
                 continue
 
             role = get_fetched_member(self.bot, "tag",
-                                      linker[discord_id])["role"]
-            role_id = None
+                                      linker[discord_id])
+            if role is None:
+                role = "nonMember"
+            else:
+                role = role["role"]
+
+            role_id = roles_id[-1]
             for i, club_role in enumerate(["member", "senior",
                                            "vicePresident", "president"]):
                 if role == club_role:
                     role_id = roles_id[i]
-            if role_id is None:
-                logger.error("`%s` member role not found! (`%s`)",
-                             member, role)
-                continue
 
             try:
                 await sync_role_category(member,
@@ -169,7 +170,7 @@ class UpdateRolesLoop(commands.Cog):
         """
         await self.bot.wait_until_ready()
 
-        while not self.bot.state["retrieved_members"]:
+        while not self.bot.state.retrieved_members:
             logger.debug("Waiting member to be fetched...")
             await asyncio.sleep(1)
 
