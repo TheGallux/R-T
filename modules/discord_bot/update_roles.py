@@ -37,6 +37,10 @@ async def sync_role_category(member, category_roles, target_role):
     Removes all category roles from the member and adds the target role if
     necessary.
     """
+    if target_role is None:
+        logger.error("Assigning target role to %s is None!",
+                     member.display_name)
+        return
     logger.debug("Syncing `%s` from `%s`", target_role, member.display_name)
 
     if target_role in member.roles:
@@ -71,15 +75,25 @@ class UpdateRolesLoop(commands.Cog):
         logger.info("Running `update_roles` loop")
 
         state = self.bot.state
-        await asyncio.gather(
-            self.update_roles_with_thresholds("trophies",
-                                              state.trophies_roles_id,
-                                              state.trophies_threshold),
-            self.update_roles_with_thresholds("ranked_elo",
-                                              state.ranked_roles_id,
-                                              state.ranked_threshold),
-            self.update_club_roles(),
-        )
+        results = \
+            await asyncio.gather(
+                self.update_roles_with_thresholds("trophies",
+                                                  state.trophies_roles_id,
+                                                  state.trophies_threshold),
+                self.update_roles_with_thresholds("ranked_elo",
+                                                  state.ranked_roles_id,
+                                                  state.ranked_threshold),
+                self.update_club_roles(),
+                return_exceptions=True,
+            )
+
+        for result in results:
+            if isinstance(result, Exception):
+                logger.error(
+                    "Role update task failed: %r",
+                    result,
+                    exc_info=(type(result), result, result.__traceback__)
+                )
 
         logger.info("`update_role` completed for %s linked members",
                     len(self.bot.state.linker))
@@ -102,12 +116,25 @@ class UpdateRolesLoop(commands.Cog):
                                discord_id)
                 continue
 
+            player = get_fetched_member(
+                self.bot,
+                "tag",
+                linker[discord_id]
+            )
+
+            if player is None:
+                logger.warning(
+                    "No fetched member for discord_id=%s tag=%s",
+                    discord_id,
+                    linker[discord_id]
+                )
+                continue
+
             role_id = get_role(
-                get_fetched_member(self.bot,
-                                   "tag",
-                                   linker[discord_id])[filt],
+                player[filt],
                 roles_id,
-                thresholds)
+                thresholds
+            )
 
             try:
                 await sync_role_category(member,
@@ -162,6 +189,8 @@ class UpdateRolesLoop(commands.Cog):
                     member.display_name, member.id
                 )
 
+        logger.info("`update_roles` finshed")
+
     @update_roles.before_loop
     async def before_update_roles(self):
         """
@@ -173,6 +202,15 @@ class UpdateRolesLoop(commands.Cog):
         while not self.bot.state.retrieved_members:
             logger.debug("Waiting member to be fetched...")
             await asyncio.sleep(1)
+
+    @update_roles.error
+    async def update_roles_error(self, error):
+        """
+        Function if the loop ever fails.
+        Prints the Exception to help debug.
+        """
+
+        logger.error("update_roles loop crashed", exc_info=error)
 
 
 async def setup(bot):
