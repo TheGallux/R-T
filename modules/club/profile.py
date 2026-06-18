@@ -35,6 +35,10 @@ class Profile(commands.Cog):
             await ctx.send("Author is not linked yet!")
             return
 
+        if author_tag is None:
+            await ctx.send("User not in club!")
+            return
+
         await ctx.send("```yaml\n" +
                        pretty_print(get_fetched_member(self.bot,
                                                        "tag",

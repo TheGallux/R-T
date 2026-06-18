@@ -43,13 +43,14 @@ class Link(commands.Cog):
                     ctx.author.id)
 
         tag = get_fetched_member(self.bot, "name",
-                                 discord_member.display_name).get("tag", None)
+                                 discord_member.display_name)
 
         if tag is None:
             await ctx.send("User not found!")
             logger.warning("No Brawl Stars account found for `%s`",
                            discord_member.display_name)
             return
+        tag = tag.get("tag", None)
 
         self.bot.state.linker[str(discord_member.id)] = tag
 

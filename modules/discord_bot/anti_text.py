@@ -5,6 +5,8 @@ does not contains a message. If it does contain a message, it create a thread
 so users can speak on it.
 """
 
+import re
+
 from discord.ext import commands
 
 from modules.utils.logger import get_logger
@@ -17,6 +19,9 @@ class AntiTextEvent(commands.Cog):
     """
     The `anti_text` event class.
     """
+    URL_REGEX = re.compile(
+        r"https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+[^\s]*"
+    )
 
     def __init__(self, bot):
         self.bot = bot
@@ -32,14 +37,15 @@ class AntiTextEvent(commands.Cog):
                     message.id)
 
         if message.author.bot:
-            logger.info("Message sent by R-T")
+            logger.info("Message sent by a bot. (%s)",
+                        message.author.display_name)
             return
 
         if message.channel.id != self.bot.state.screenshot_channel:
             logger.info("Message not sent in a tracked channel")
             return
 
-        if not message.attachments:
+        if not (message.attachments or self.URL_REGEX.search(message.content)):
             logger.info("Deleted message because not containing an image.")
             await message.delete()
             await message.channel.send(

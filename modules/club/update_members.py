@@ -156,6 +156,15 @@ class UpdateMembersLoop(commands.Cog):
         self.bot.state.admins = admins
         self.bot.state.retrieved_members = True
 
+    @update_members.error
+    async def update_members_error(self, error):
+        """
+        Function if the loop ever fails.
+        Prints the Exception to help debug.
+        """
+
+        logger.error("'update_members' loop crashed", exc_info=error)
+
 
 async def setup(bot):
     """
