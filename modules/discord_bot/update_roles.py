@@ -189,8 +189,6 @@ class UpdateRolesLoop(commands.Cog):
                     member.display_name, member.id
                 )
 
-        logger.info("`update_roles` finshed")
-
     @update_roles.before_loop
     async def before_update_roles(self):
         """
@@ -201,7 +199,7 @@ class UpdateRolesLoop(commands.Cog):
 
         while not self.bot.state.retrieved_members:
             logger.debug("Waiting member to be fetched...")
-            await asyncio.sleep(1)
+            await asyncio.sleep(5)
 
     @update_roles.error
     async def update_roles_error(self, error):
@@ -211,6 +209,12 @@ class UpdateRolesLoop(commands.Cog):
         """
 
         logger.error("update_roles loop crashed", exc_info=error)
+
+        await asyncio.sleep(6)
+        logger.info("Restarting 'update_roles' loop.")
+
+        if not self.update_roles.is_running():
+            self.update_roles.start()
 
 
 async def setup(bot):

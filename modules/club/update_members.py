@@ -61,7 +61,7 @@ async def fetch_player(session, tag: str):
 
         if response.status != 200:
             logger.error("Error fetching player: %s", tag)
-            return None
+            assert False
         logger.debug("Succesfully fetched player %s", tag)
 
         return await response.json()
@@ -109,6 +109,7 @@ class UpdateMembersLoop(commands.Cog):
 
         except (aiohttp.ClientError, asyncio.TimeoutError) as e:
             logger.error("Unexpected error fetching members: %s", e)
+            return
 
         try:
             data2 = await self.upgrade_fetched_members(
@@ -118,6 +119,7 @@ class UpdateMembersLoop(commands.Cog):
 
         except (aiohttp.ClientError, asyncio.TimeoutError) as e:
             logger.error("Unexpected error fetching enriched players: %s", e)
+            return
 
         # Using fetched data
         club_map = {m["tag"]: m for m in data}
@@ -163,7 +165,14 @@ class UpdateMembersLoop(commands.Cog):
         Prints the Exception to help debug.
         """
 
-        logger.error("'update_members' loop crashed", exc_info=error)
+        logger.error("'update_members' loop crashed (%s)", error)
+
+        await asyncio.sleep(6)
+
+        logger.info("Restarting 'update_members' loop.")
+
+        if not self.update_members.is_running():
+            self.update_members.start()
 
 
 async def setup(bot):
