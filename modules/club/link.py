@@ -9,6 +9,7 @@ import discord
 from discord.ext import commands
 
 from modules.utils.logger import get_logger
+from modules.utils.is_admin import discord_user_is_admin
 from modules.utils.get_fetched_member import get_fetched_member
 
 logger = get_logger(__name__)
@@ -42,6 +43,12 @@ class Link(commands.Cog):
         logger.info("`link` command used by `%s` (%s)", ctx.author,
                     ctx.author.id)
 
+        if not discord_user_is_admin(self.bot, ctx.author.id):
+            logger.info("`link` command used by a non admin! (`%s`, `%s`)",
+                        ctx.author.display_name, ctx.author.id)
+            await ctx.send("Error: Command user is not an admin!")
+            return
+
         tag = get_fetched_member(self.bot, "name",
                                  discord_member.display_name)
 
@@ -70,6 +77,12 @@ class Link(commands.Cog):
         logger.info("`unlink` command used by `%s` (`%s`)",
                     ctx.author.display_name, ctx.author.id)
         discord_id = str(discord_member.id)
+
+        if not discord_user_is_admin(self.bot, ctx.author.id):
+            logger.info("`unlink` command used by a non admin! (`%s`, `%s`)",
+                        ctx.author.display_name, ctx.author.id)
+            await ctx.send("Error: Command user is not an admin!")
+            return
 
         if discord_id not in self.bot.state.linker:
             logger.warning("`%s` is not linked", discord_member.id)
