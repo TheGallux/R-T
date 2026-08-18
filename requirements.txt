@@ -3,3 +3,7 @@ python-dotenv
 aiohttp
 requests
 pylint
+yt-dlp
+PyNaCl
+davey
+Pillow
