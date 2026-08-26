@@ -12,6 +12,7 @@ from discord.ext import commands
 
 from modules.core.bot_state import BotState
 from modules.utils.logger import get_logger
+from modules.utils.is_admin import discord_user_is_admin
 
 
 logger = get_logger(__name__)
@@ -78,6 +79,14 @@ async def reload(ctx, extension):
     """
     Allows reloading modules when running using `!reload <module>`
     """
+    logger.info("`reload` command used by `%s` (%s)", ctx.author,
+                ctx.author.id)
+
+    if not discord_user_is_admin(bot, ctx.author.id):
+        await ctx.send("You aren't an admin!")
+        logger.info("User tried 'reload' but isn't an admin! (%s)",
+                    ctx.author.id)
+        return
 
     await bot.reload_extension(f"modules.{extension}")
     await ctx.send(f"Reloaded {extension}")
