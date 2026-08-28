@@ -39,11 +39,10 @@ class Profile(commands.Cog):
             await ctx.send("User not in club!")
             return
 
-        await ctx.send("```yaml\n" +
-                       pretty_print(get_fetched_member(self.bot,
-                                                       "tag",
-                                                       author_tag))
-                       + "```")
+        member = get_fetched_member(self.bot, "tag", author_tag).copy()
+        del member["brawlers"]
+
+        await ctx.send("```yaml\n" + pretty_print(member) + "```")
 
 
 async def setup(bot):

@@ -35,7 +35,8 @@ class Member(commands.Cog):
             await ctx.send("Command user is not an administrator !")
             return
 
-        member = get_fetched_member(self.bot, "name", member_name)
+        member = get_fetched_member(self.bot, "name", member_name).copy()
+        del member["brawlers"]
         if member is not None:
             await ctx.send(f"```yaml\n{pretty_print(member)}```")
             return

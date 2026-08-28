@@ -143,6 +143,7 @@ class UpdateMembersLoop(commands.Cog):
                     player_data.get("highestSeasonRankedElo"),
                 "highest_all_time_ranked_elo":
                     player_data.get("highestAllTimeRankedElo"),
+                "brawlers": player_data.get("brawlers"),
             }
 
             if parsed_member["role"] in ("president", "vicePresident"):
