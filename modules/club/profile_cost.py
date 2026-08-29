@@ -10,9 +10,9 @@ Gadgets, Star Powers, Hypercharges, and Buffies.
 from discord.ext import commands
 
 from modules.utils.get_fetched_member import get_fetched_member
-from modules.utils.pretty_print import pretty_print
+from modules.utils.is_admin import discord_user_is_admin
 from modules.utils.logger import get_logger
-
+from modules.utils.pretty_print import pretty_print
 
 logger = get_logger(__name__)
 
@@ -103,21 +103,36 @@ class ProfileCost(commands.Cog):
         logger.info("Initialized `profile_cost` cog")
 
     @commands.command()
-    async def profile_cost(self, ctx):
+    async def profile_cost(self, ctx, player: str = None):
         """
         The `profile_cost` command.
         """
         logger.info("`profile_cost` command used by `%s` (%s)", ctx.author,
                     ctx.author.id)
 
-        author_tag = self.bot.state.linker.get(str(ctx.author.id), '')
-        if author_tag == '':
-            await ctx.send("Author is not linked yet!")
-            return
+        if player is None:
+            # Normal user: use their linked account
+            author_tag = self.bot.state.linker.get(str(ctx.author.id), '')
 
-        if author_tag is None:
-            await ctx.send("User not in club!")
-            return
+            if author_tag == '':
+                await ctx.send("Author is not linked yet!")
+                return
+
+            if author_tag is None:
+                await ctx.send("User not in club!")
+                return
+
+        else:
+            if not discord_user_is_admin(self.bot, ctx.author.id):
+                await ctx.send("You must be an admin to use `profile_cost` for"
+                               " another player!")
+                return
+
+            author_tag = get_fetched_member(self.bot, "name", player)["tag"]
+
+            if author_tag is None:
+                await ctx.send(f"Could not find player `{player}`!")
+                return
 
         member = get_fetched_member(self.bot, "tag", author_tag)
 
