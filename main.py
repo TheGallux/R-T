@@ -101,6 +101,8 @@ async def main():
         bot.state = BotState()
         bot.state.retrieved_members = False
         bot.state.screenshot_channel = int(os.getenv("SCREENSHOT_CHANNEL"))
+        bot.state.linker_name = os.getenv("LINKER_NAME")
+        bot.state.db_name = os.getenv("DB_NAME")
 
         bot.state.trophies_roles_id = \
             [int(role) for role in os.getenv("TROPHIES_ROLES_ID").split(',')]
@@ -115,8 +117,13 @@ async def main():
         bot.state.club_roles_id = \
             [int(role) for role in os.getenv("CLUB_ROLES_ID").split(',')]
 
-        with open("link.json", 'r', encoding="utf-8") as f:
-            bot.state.linker = json.loads(''.join(f.readlines()))
+        with open(bot.state.linker_name, 'r', encoding="utf-8") as f:
+            json_read = json.loads(''.join(f.readlines()))
+        bot.state.linker = {k: json_read[k].get("tag") for k in json_read}
+        bot.state.chaos_drop = {k: json_read[k].get("chaos_drop")
+                                for k in json_read}
+        bot.state.currency = {k: json_read[k].get("currency")
+                              for k in json_read}
 
         await load_extensions()
         await bot.start(TOKEN)

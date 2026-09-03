@@ -18,10 +18,14 @@ class BotState:
     retrieved_members: bool = False
 
     guild = None
+    linker_name: str = field(default_factory=str)
+    db_name: str = field(default_factory=str)
 
     members: list = field(default_factory=list)
 
     linker: dict = field(default_factory=dict)
+    chaos_drop: dict = field(default_factory=dict)
+    currency: dict = field(default_factory=dict)
 
     trophies_roles_id: list[int] = field(default_factory=list)
     trophies_threshold: list[int] = field(default_factory=list)

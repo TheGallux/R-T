@@ -3,7 +3,6 @@ The `link` command.
 Links a Discord member to a Brawl Stars account.
 """
 
-import json
 import discord
 
 from discord.ext import commands
@@ -11,6 +10,7 @@ from discord.ext import commands
 from modules.utils.logger import get_logger
 from modules.utils.is_admin import discord_user_is_admin
 from modules.utils.get_fetched_member import get_fetched_member
+from modules.utils.update_json import update_json
 
 logger = get_logger(__name__)
 
@@ -23,17 +23,6 @@ class Link(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         logger.info("Initialized `link` cog")
-
-    def update_json(self, path: str):
-        """
-        Updates the json file contaning the dictionnary Discord UUID - Brawl
-        Stars tag.
-        """
-
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(self.bot.state.linker, f, indent=4)
-
-        logger.info("Updated linker file (%s)", path)
 
     @commands.command()
     async def link(self, ctx, discord_member: discord.Member):
@@ -60,8 +49,10 @@ class Link(commands.Cog):
         tag = tag.get("tag", None)
 
         self.bot.state.linker[str(discord_member.id)] = tag
+        self.bot.state.chaos_drop[str(discord_member.id)] = 0
+        self.bot.state.currency[str(discord_member.id)] = 0
 
-        self.update_json("link.json")
+        update_json(self.bot)
 
         logger.info("Linked Discord member `%s` to Brawl Stars tag `%s`",
                     discord_member.id,
@@ -90,8 +81,10 @@ class Link(commands.Cog):
             return
 
         del self.bot.state.linker[discord_id]
+        del self.bot.state.chaos_drop[discord_id]
+        del self.bot.state.currency[discord_id]
 
-        self.update_json("link.json")
+        update_json(self.bot)
 
         logger.info("Unlinked Discord member `%s`", discord_member.id)
         await ctx.send(f"Successfully unlinked {discord_member.mention}.")
