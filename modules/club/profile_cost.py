@@ -139,7 +139,7 @@ class ProfileCost(commands.Cog):
         resources = {
             "coins": 0,
             "power_points": 0,
-            "credits": 0
+            "credits": member["fame"]
         }
 
         for brawler in member["brawlers"]:

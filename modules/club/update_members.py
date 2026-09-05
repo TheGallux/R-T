@@ -138,6 +138,7 @@ class UpdateMembersLoop(commands.Cog):
                 "trophies": club_member.get("trophies"),
 
                 # enriched player data
+                "fame": player_data.get("fame"),
                 "ranked_elo": player_data.get("rankedElo"),
                 "highest_season_ranked_elo":
                     player_data.get("highestSeasonRankedElo"),
