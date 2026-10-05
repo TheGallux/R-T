@@ -66,7 +66,7 @@ BRAWLERS_BY_RARITY = {
         "GRAY", "R-T", "WILLOW", "DOUG", "CHUCK", "CHARLIE", "MICO", "MELODIE",
         "LILY", "CLANCY", "MOE", "JUJU", "OLLIE", "LUMI", "FINX", "JAE-YONG",
         "ALLI", "MINA", "ZIGGY", "GIGI", "GLOWY", "NAJIA", "DAMIAN",
-        "STARR NOVA", "WENDY"
+        "STARR NOVA", "WENDY", "COSMO", "VINCE"
     ],
 
     "LEGENDARY": [
