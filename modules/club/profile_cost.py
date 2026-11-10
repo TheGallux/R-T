@@ -66,12 +66,13 @@ BRAWLERS_BY_RARITY = {
         "GRAY", "R-T", "WILLOW", "DOUG", "CHUCK", "CHARLIE", "MICO", "MELODIE",
         "LILY", "CLANCY", "MOE", "JUJU", "OLLIE", "LUMI", "FINX", "JAE-YONG",
         "ALLI", "MINA", "ZIGGY", "GIGI", "GLOWY", "NAJIA", "DAMIAN",
-        "STARR NOVA", "WENDY", "COSMO", "VINCE"
+        "STARR NOVA", "WENDY", "COSMO", "VINCE", "REY", "RUBY"
     ],
 
     "LEGENDARY": [
         "SPIKE", "CROW", "LEON", "SANDY", "SURGE", "AMBER", "MEG", "CHESTER",
-        "CORDELIUS", "KIT", "DRACO", "KENJI", "PIERCE", "NORI"
+        "CORDELIUS", "KIT", "DRACO", "KENJI", "PIERCE", "NORI",
+        "THUNDER FROGS"
     ],
 
     "ULTRA_LEGENDARY": [
